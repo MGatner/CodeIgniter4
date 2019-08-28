@@ -1,4 +1,4 @@
-<?php namespace CodeIgniter\Commands\Database;
+<?php
 
 /**
  * CodeIgniter
@@ -32,20 +32,22 @@
  * @copyright  2014-2019 British Columbia Institute of Technology (https://bcit.ca/)
  * @license    https://opensource.org/licenses/MIT	MIT License
  * @link       https://codeigniter.com
- * @since      Version 3.0.0
+ * @since      Version 4.0.0
  * @filesource
  */
+
+namespace CodeIgniter\Commands\Database;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 use Config\Services;
 
 /**
- * Creates a new migration file.
+ * Runs all new migrations.
  *
  * @package CodeIgniter\Commands
  */
-class MigrateLatest extends BaseCommand
+class Migrate extends BaseCommand
 {
 	/**
 	 * The group the command is lumped under
@@ -60,21 +62,21 @@ class MigrateLatest extends BaseCommand
 	 *
 	 * @var string
 	 */
-	protected $name = 'migrate:latest';
+	protected $name = 'migrate';
 
 	/**
 	 * the Command's short description
 	 *
 	 * @var string
 	 */
-	protected $description = 'Migrates the database to the latest schema.';
+	protected $description = 'Locates and runs all new migrations against the database.';
 
 	/**
 	 * the Command's usage
 	 *
 	 * @var string
 	 */
-	protected $usage = 'migrate:latest [options]';
+	protected $usage = 'migrate [options]';
 
 	/**
 	 * the Command's Arguments
@@ -91,7 +93,7 @@ class MigrateLatest extends BaseCommand
 	protected $options = [
 		'-n'   => 'Set migration namespace',
 		'-g'   => 'Set database group',
-		'-all' => 'Set latest for all namespace, will ignore (-n) option',
+		'-all' => 'Set for all namespaces, will ignore (-n) option',
 	];
 
 	/**
@@ -102,22 +104,31 @@ class MigrateLatest extends BaseCommand
 	public function run(array $params = [])
 	{
 		$runner = Services::migrations();
+		$runner->clearCliMessages();
 
-		CLI::write(lang('Migrations.toLatest'), 'yellow');
+		CLI::write(lang('Migrations.latest'), 'yellow');
 
 		$namespace = $params['-n'] ?? CLI::getOption('n');
 		$group     = $params['-g'] ?? CLI::getOption('g');
 
 		try
 		{
+			// Check for 'all' namespaces
 			if ($this->isAllNamespace($params))
 			{
-				$runner->latestAll($group);
+				$runner->setNamespace(null);
 			}
-			else
+			// Check for a specified namespace
+			elseif ($namespace)
 			{
-				$runner->latest($namespace, $group);
+				$runner->setNamespace($namespace);
 			}
+
+			if (! $runner->latest($group))
+			{
+				CLI::write(lang('Migrations.generalFault'), 'red');
+			}
+
 			$messages = $runner->getCliMessages();
 			foreach ($messages as $message)
 			{
@@ -142,7 +153,7 @@ class MigrateLatest extends BaseCommand
 	 * @param  array $params
 	 * @return boolean
 	 */
-	private function isAllNamespace(array $params)
+	private function isAllNamespace(array $params): bool
 	{
 		if (array_search('-all', $params) !== false)
 		{

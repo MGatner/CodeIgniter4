@@ -8,7 +8,7 @@
  * @copyright  2014-2019 British Columbia Institute of Technology (https://bcit.ca/)
  * @license    https://opensource.org/licenses/MIT	MIT License
  * @link       https://codeigniter.com
- * @since      Version 3.0.0
+ * @since      Version 4.0.0
  * @filesource
  *
  * @codeCoverageIgnore
@@ -17,9 +17,9 @@
 return [
 	// Migration Runner
    'missingTable'      => 'Migrations table must be set.',
-   'invalidType'       => 'An invalid migration numbering type was specified: {0}',
    'disabled'          => 'Migrations have been loaded but are disabled or setup incorrectly.',
    'notFound'          => 'Migration file not found: ',
+   'batchNotFound'     => 'Target batch not found: ',
    'empty'             => 'No Migration files found',
    'gap'               => 'There is a gap in the migration sequence near version number: ',
    'classNotFound'     => 'The migration class "%s" could not be found.',
@@ -38,11 +38,12 @@ return [
    'writeError'        => 'Error trying to create file.',
    'migNumberError'    => 'Migration number must be three digits, and there must not be any gaps in the sequence.',
 
-   'toLatest'          => 'Migrating to latest version...',
+   'latest'            => 'Running all new migrations...',
+   'generalFault'      => 'Migration failed!',
    'migInvalidVersion' => 'Invalid version number provided.',
    'toVersionPH'       => 'Migrating to version %s...',
    'toVersion'         => 'Migrating to current version...',
-   'rollingBack'       => 'Rolling back all migrations...',
+   'rollingBack'       => 'Rolling back migrations to batch: ',
    'noneFound'         => 'No migrations were found.',
    'on'                => 'Migrated On: ',
    'migSeeder'         => 'Seeder name',

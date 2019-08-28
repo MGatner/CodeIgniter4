@@ -12,13 +12,17 @@ git checkout $branch
 echo -e "${BOLD}Build the framework distributable${NORMAL}"
 
 echo -e "${BOLD}Copy the main files/folders...${NORMAL}"
-releasable='app public writable README.md contributing.md env license.txt spark tests/_support'
+releasable='app public writable README.md contributing.md env license.txt spark .gitignore'
 for fff in $releasable ; do
     if [ -d "$fff" ] ; then
         rm -rf $fff
     fi
     cp -rf ${CI_DIR}/$fff .
 done
+
+rm -rf tests
+mkdir tests
+cp -rf ${CI_DIR}/tests/_support tests/
 
 echo -e "${BOLD}Override as needed...${NORMAL}"
 cp -rf ${CI_DIR}/admin/starter/* .

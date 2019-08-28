@@ -106,7 +106,7 @@ function::
 
 	$query = $builder->getWhere(['id' => $id], $limit, $offset);
 
-Please read about the where function below for more information.
+Please read about the `where` function below for more information.
 
 **$builder->select()**
 
@@ -171,6 +171,20 @@ the resulting field.
 Writes a "SELECT SUM(field)" portion for your query. As with
 selectMax(), You can optionally include a second parameter to rename
 the resulting field.
+
+::
+
+	$builder->selectSum('age');
+	$query = $builder->get(); // Produces: SELECT SUM(age) as age FROM mytable
+
+**$builder->selectCount()**
+
+Writes a "SELECT COUNT(field)" portion for your query. As with
+selectMax(), You can optionally include a second parameter to rename
+the resulting field.
+
+.. note:: This method is particularly helpful when used with ``groupBy()``. For
+counting results generally see ``countAll()`` or ``countAllResults()``.
 
 ::
 

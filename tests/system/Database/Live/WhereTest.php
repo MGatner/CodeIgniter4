@@ -121,4 +121,98 @@ class WhereTest extends CIDatabaseTestCase
 
 	//--------------------------------------------------------------------
 
+	public function testSubQuery()
+	{
+		$subQuery = $this->db->table('job')
+		                     ->select('id')
+		                     ->where('name', 'Developer')
+		                     ->getCompiledSelect();
+		
+		$jobs = $this->db->table('job')
+		                 ->where('id not in (' . $subQuery . ')', null, false)
+		                 ->get()
+		                 ->getResult();
+
+		$this->assertCount(3, $jobs);
+		$this->assertEquals('Politician', $jobs[0]->name);
+		$this->assertEquals('Accountant', $jobs[1]->name);
+		$this->assertEquals('Musician', $jobs[2]->name);
+	}
+
+	//--------------------------------------------------------------------
+
+	public function testSubQueryAnotherType()
+	{
+		$subQuery = $this->db->table('job')
+		                     ->select('id')
+		                     ->where('name', 'Developer')
+		                     ->getCompiledSelect();
+
+		$jobs = $this->db->table('job')
+		                 ->where('id = (' . $subQuery . ')', null, false)
+		                 ->get()
+		                 ->getResult();
+
+		$this->assertCount(1, $jobs);
+		$this->assertEquals('Developer', $jobs[0]->name);
+	}
+
+	//--------------------------------------------------------------------
+
+	public function testWhereNullParam()
+	{
+		$this->db->table('job')
+				 ->insert([
+					'name'        => 'Brewmaster',
+					'description' => null,
+				 ]);
+				 
+		$jobs = $this->db->table('job')
+						 ->where('description', null)
+						 ->get()
+						 ->getResult();
+
+		$this->assertCount(1, $jobs);
+		$this->assertEquals('Brewmaster', $jobs[0]->name);
+	}
+
+	//--------------------------------------------------------------------
+
+	public function testWhereIsNull()
+	{
+		$this->db->table('job')
+				 ->insert([
+					'name'        => 'Brewmaster',
+					'description' => null,
+				 ]);
+				 
+		$jobs = $this->db->table('job')
+						 ->where('description IS NULL')
+						 ->get()
+						 ->getResult();
+
+		$this->assertCount(1, $jobs);
+		$this->assertEquals('Brewmaster', $jobs[0]->name);
+	}
+
+	//--------------------------------------------------------------------
+
+	public function testWhereIsNotNull()
+	{
+		$this->db->table('job')
+				 ->insert([
+					'name'        => 'Brewmaster',
+					'description' => null,
+				 ]);
+				 
+		$jobs = $this->db->table('job')
+						 ->where('description IS NOT NULL')
+						 ->get()
+						 ->getResult();
+
+		$this->assertCount(4, $jobs);
+	}
+
+	//--------------------------------------------------------------------
+
 }

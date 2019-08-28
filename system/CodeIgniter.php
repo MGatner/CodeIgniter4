@@ -1,5 +1,4 @@
-<?php namespace CodeIgniter;
-
+<?php
 /**
  * CodeIgniter
  *
@@ -32,10 +31,13 @@
  * @copyright  2014-2019 British Columbia Institute of Technology (https://bcit.ca/)
  * @license    https://opensource.org/licenses/MIT	MIT License
  * @link       https://codeigniter.com
- * @since      Version 3.0.0
+ * @since      Version 4.0.0
  * @filesource
  */
 
+namespace CodeIgniter;
+
+use Closure;
 use CodeIgniter\Filters\Exceptions\FilterException;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -50,6 +52,7 @@ use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\CLIRequest;
 use CodeIgniter\Router\RouteCollectionInterface;
 use CodeIgniter\Exceptions\PageNotFoundException;
+use Exception;
 
 /**
  * This class is the core of the framework, and will analyse the
@@ -62,7 +65,7 @@ class CodeIgniter
 	/**
 	 * The current version of CodeIgniter Framework
 	 */
-	const CI_VERSION = '4.0.0-beta.1';
+	const CI_VERSION = '4.0.0-beta.4';
 
 	/**
 	 * App startup time.
@@ -158,6 +161,11 @@ class CodeIgniter
 
 	//--------------------------------------------------------------------
 
+	/**
+	 * Constructor.
+	 *
+	 * @param type $config
+	 */
 	public function __construct($config)
 	{
 		$this->startTime = microtime(true);
@@ -280,7 +288,7 @@ class CodeIgniter
 	 * @param boolean                                      $returnResponse
 	 *
 	 * @return \CodeIgniter\HTTP\RequestInterface|\CodeIgniter\HTTP\Response|\CodeIgniter\HTTP\ResponseInterface|mixed
-	 * @throws \CodeIgniter\Router\RedirectException
+	 * @throws \CodeIgniter\Router\Exceptions\RedirectException
 	 */
 	protected function handleRequest(RouteCollectionInterface $routes = null, $cacheConfig, bool $returnResponse = false)
 	{
@@ -347,6 +355,12 @@ class CodeIgniter
 		else
 		{
 			$response = $this->response;
+			
+			// Set response code for CLI command failures
+			if (is_numeric($returned) || $returned === false)
+			{
+				$response->setStatusCode(400);
+			}
 		}
 
 		if ($response instanceof Response)
@@ -544,7 +558,7 @@ class CodeIgniter
 			$cachedResponse = unserialize($cachedResponse);
 			if (! is_array($cachedResponse) || ! isset($cachedResponse['output']) || ! isset($cachedResponse['headers']))
 			{
-				throw new \Exception('Error unserializing page cache');
+				throw new Exception('Error unserializing page cache');
 			}
 
 			$headers = $cachedResponse['headers'];
@@ -615,7 +629,7 @@ class CodeIgniter
 	 *
 	 * @return array
 	 */
-	public function getPerformanceStats()
+	public function getPerformanceStats(): array
 	{
 		return [
 			'startTime' => $this->startTime,
@@ -634,7 +648,7 @@ class CodeIgniter
 	 */
 	protected function generateCacheName($config): string
 	{
-		if (is_cli() && ! (ENVIRONMENT === 'testing'))
+		if (get_class($this->request) === CLIRequest::class)
 		{
 			return md5($this->request->getPath());
 		}
@@ -686,7 +700,7 @@ class CodeIgniter
 	 *                                         of the config file.
 	 *
 	 * @return string
-	 * @throws \CodeIgniter\Router\RedirectException
+	 * @throws \CodeIgniter\Router\Exceptions\RedirectException
 	 */
 	protected function tryToRouteIt(RouteCollectionInterface $routes = null)
 	{
@@ -696,7 +710,7 @@ class CodeIgniter
 		}
 
 		// $routes is defined in Config/Routes.php
-		$this->router = Services::router($routes);
+		$this->router = Services::router($routes, $this->request);
 
 		$path = $this->determinePath();
 
@@ -848,7 +862,7 @@ class CodeIgniter
 		// Is there a 404 Override available?
 		if ($override = $this->router->get404Override())
 		{
-			if ($override instanceof \Closure)
+			if ($override instanceof Closure)
 			{
 				echo $override($e->getMessage());
 			}
@@ -960,6 +974,17 @@ class CodeIgniter
 	 */
 	public function storePreviousURL($uri)
 	{
+		// Ignore CLI requests
+		if (is_cli())
+		{
+			return;
+		}
+		// Ignore AJAX requests
+		if (method_exists($this->request, 'isAJAX') && $this->request->isAJAX())
+		{
+			return;
+		}
+
 		// This is mainly needed during testing...
 		if (is_string($uri))
 		{
@@ -977,16 +1002,9 @@ class CodeIgniter
 	/**
 	 * Modifies the Request Object to use a different method if a POST
 	 * variable called _method is found.
-	 *
-	 * Does not work on CLI commands.
 	 */
 	public function spoofRequestMethod()
 	{
-		if (is_cli())
-		{
-			return;
-		}
-
 		// Only works with POSTED forms
 		if ($this->request->getMethod() !== 'post')
 		{
