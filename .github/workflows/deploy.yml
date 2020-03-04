@@ -30,7 +30,7 @@ jobs:
       - name: Release
         uses: actions/github-script@0.8.0
         with:
-          result-encoding: string
+          github-token: ${{secrets.ACCESS_TOKEN}}
           script: |
             const release = await github.repos.getLatestRelease({
               owner: context.repo.owner,
@@ -38,7 +38,7 @@ jobs:
             })
             github.repos.createRelease({
               owner: context.repo.owner,
-              repo: context.repo.repo,
+              repo: 'mgatner/framework',
               tag_name: release.data.tag_name,
               name: release.data.name,
               body: release.data.body
