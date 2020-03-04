@@ -38,7 +38,7 @@ jobs:
             })
             github.repos.createRelease({
               owner: context.repo.owner,
-              repo: 'mgatner/framework',
+              repo: 'framework',
               tag_name: release.data.tag_name,
               name: release.data.name,
               body: release.data.body
