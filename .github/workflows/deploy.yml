@@ -39,7 +39,6 @@ jobs:
             github.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: release.tag_name,
               body: release.body
             })
 
@@ -53,10 +52,11 @@ jobs:
         with:
           result-encoding: string
           script: |
-            console.log(github.repos.getLatestRelease({
+            const release = await github.repos.getLatestRelease({
               owner: context.repo.owner,
               repo: context.repo.repo
-            }))
+            })
+            console.log(release)
 
       - name: Checkout source
         uses: actions/checkout@v2
