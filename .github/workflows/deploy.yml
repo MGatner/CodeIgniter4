@@ -39,7 +39,9 @@ jobs:
             github.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: release.body
+              tag_name: release.data.tag_name,
+              name: release.data.name,
+              body: release.data.body
             })
 
   appstarter:
