@@ -19,6 +19,7 @@ use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\URI;
 use CodeIgniter\Images\ImageHandlerInterface;
 use CodeIgniter\Language\Language;
+use CodeIgniter\Messenger\MessengerInterface;
 use CodeIgniter\Pager\Pager;
 use CodeIgniter\Router\RouteCollection;
 use CodeIgniter\Router\Router;
@@ -109,6 +110,18 @@ class ServicesTest extends CIUnitTestCase
 	{
 		$actual = Services::email(new \Config\Email(), false);
 		$this->assertInstanceOf(Email::class, $actual);
+	}
+
+	public function testNewMessenger()
+	{
+		$actual = Services::messenger();
+		$this->assertInstanceOf(MessengerInterface::class, $actual);
+	}
+
+	public function testNewUnsharedMessenger()
+	{
+		$actual = Services::messenger(null, false);
+		$this->assertInstanceOf(MessengerInterface::class, $actual);
 	}
 
 	public function testNewExceptions()

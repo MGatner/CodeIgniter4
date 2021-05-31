@@ -63,6 +63,7 @@ use Config\Filters as FiltersConfig;
 use Config\Format as FormatConfig;
 use Config\Honeypot as HoneypotConfig;
 use Config\Images;
+use Config\Messenger as MessengerConfig;
 use Config\Migrations;
 use Config\Pager as PagerConfig;
 use Config\Toolbar as ToolbarConfig;
@@ -440,6 +441,41 @@ class Services extends BaseService
 		}
 
 		return new Logger(config('Logger'));
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * The Messenger class lets you send composed messages via mail, sendmail, SMTP.
+	 *
+	 * @param MessengerConfig|null $config
+	 * @param boolean $getShared
+	 *
+	 * @return \CodeIgniter\Messenger\MessengerInterface
+	 */
+	public static function messenger($config = null, bool $getShared = true)
+	{
+		if ($getShared)
+		{
+			return static::getSharedInstance('messenger', $config);
+		}
+
+		if (empty($config))
+		{
+			$config = new \Config\MessengerConfig();
+		}
+
+		$protocolMap = [
+			'mail'     => 'MailHandler',
+			'sendmail' => 'SendmailHandler',
+			'smtp'     => 'SMTPHandler',
+		];
+
+		$handler   = '\\CodeIgniter\\Messenger\\Handlers\\' . ($protocolMap[$config->protocol ?? 'mail'] );
+		$messenger = new $handler($config);
+		$messenger->setLogger(static::logger(true));
+
+		return $messenger;
 	}
 
 	//--------------------------------------------------------------------
