@@ -90,7 +90,6 @@ use Config\View as ViewConfig;
  */
 class Services extends BaseService
 {
-<<<<<<< HEAD
     /**
      * The cache class provides a simple way to store and retrieve
      * complex data for later.
@@ -427,7 +426,7 @@ class Services extends BaseService
         return new Logger(config('Logger'));
     }
 
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     /**
      * The Mailer class lets you send composed messages via mail, sendmail, SMTP.
@@ -437,7 +436,7 @@ class Services extends BaseService
      *
      * @return \CodeIgniter\Mailer\MailerInterface
      */
-    public static function mailer($config = null, bool $getShared = true)
+    public static function mailer(MailerConfig $config = null, bool $getShared = true)
     {
         if ($getShared)
         {
@@ -446,7 +445,7 @@ class Services extends BaseService
 
         if (empty($config))
         {
-            $config = new \Config\MailerConfig();
+            $config = new MailerConfig();
         }
 
         $protocolMap = [
