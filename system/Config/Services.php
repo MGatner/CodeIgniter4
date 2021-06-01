@@ -453,7 +453,7 @@ class Services extends BaseService
 	 *
 	 * @return \CodeIgniter\Mailer\MailerInterface
 	 */
-	public static function mailer($config = null, bool $getShared = true)
+	public static function mailer(MailerConfig $config = null, bool $getShared = true)
 	{
 		if ($getShared)
 		{
@@ -462,7 +462,7 @@ class Services extends BaseService
 
 		if (empty($config))
 		{
-			$config = new \Config\MailerConfig();
+			$config = new MailerConfig();
 		}
 
 		$protocolMap = [
